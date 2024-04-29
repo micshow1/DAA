@@ -1,0 +1,139 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+// Structure to represent a Huffman tree node
+struct Node {
+    char data;
+    unsigned freq;
+    struct Node *left, *right;
+};
+
+// Structure to represent a priority queue node
+struct PriorityQueueNode {
+    struct Node* data;
+    struct PriorityQueueNode* next;
+};
+
+// Structure to represent a priority queue
+struct PriorityQueue {
+    struct PriorityQueueNode *front, *rear;
+};
+
+// Function to create a new node
+struct Node* createNode(char data, unsigned freq) {
+    struct Node* newNode = (struct Node*)malloc(sizeof(struct Node));
+    newNode->data = data;
+    newNode->freq = freq;
+    newNode->left = newNode->right = NULL;
+    return newNode;
+}
+
+// Function to create a new priority queue node
+struct PriorityQueueNode* createPriorityQueueNode(struct Node* data) {
+    struct PriorityQueueNode* newNode = (struct PriorityQueueNode*)malloc(sizeof(struct PriorityQueueNode));
+    newNode->data = data;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to create a new priority queue
+struct PriorityQueue* createPriorityQueue() {
+    struct PriorityQueue* pq = (struct PriorityQueue*)malloc(sizeof(struct PriorityQueue));
+    pq->front = pq->rear = NULL;
+    return pq;
+}
+
+// Function to check if the priority queue is empty
+bool isEmpty(struct PriorityQueue* pq) {
+    return pq->front == NULL;
+}
+
+// Function to insert a node with given data and priority in priority queue
+void enqueue(struct PriorityQueue* pq, struct Node* data) {
+    struct PriorityQueueNode* newNode = createPriorityQueueNode(data);
+    if (isEmpty(pq)) {
+        pq->front = pq->rear = newNode;
+        return;
+    }
+    pq->rear->next = newNode;
+    pq->rear = newNode;
+}
+
+// Function to remove and return the node with the highest priority from the queue
+struct Node* dequeue(struct PriorityQueue* pq) {
+    if (isEmpty(pq))
+        return NULL;
+    struct PriorityQueueNode* temp = pq->front;
+    struct Node* data = temp->data;
+    pq->front = pq->front->next;
+    free(temp);
+    return data;
+}
+
+// Function to build the Huffman tree
+struct Node* buildHuffmanTree(char data[], int freq[], int size) {
+    struct Node *left, *right, *top;
+    struct PriorityQueue* pq = createPriorityQueue();
+
+    // Create a priority queue with all characters and their frequencies
+    for (int i = 0; i < size; ++i)
+        enqueue(pq, createNode(data[i], freq[i]));
+
+    // Iterate until there is more than one node in the queue
+    while (!isEmpty(pq)) {
+        // Extract the two nodes with the minimum frequency
+        left = dequeue(pq);
+        right = dequeue(pq);
+
+        // Create a new internal node with sum of frequencies of the two nodes
+        top = createNode('$', left->freq + right->freq);
+        top->left = left;
+        top->right = right;
+
+        // Add the new node to the priority queue
+        enqueue(pq, top);
+    }
+    // The remaining node is the root of the Huffman tree
+    return dequeue(pq);
+}
+
+// Function to print the Huffman codes
+void printCodes(struct Node* root, int arr[], int top) {
+    // Assign 0 to left edge and recur
+    if (root->left) {
+        arr[top] = 0;
+        printCodes(root->left, arr, top + 1);
+    }
+    // Assign 1 to right edge and recur
+    if (root->right) {
+        arr[top] = 1;
+        printCodes(root->right, arr, top + 1);
+    }
+    // If this is a leaf node, it contains one of the input characters,
+    // print the character and its code from arr[]
+    if (!(root->left) && !(root->right)) {
+        printf("%c: ", root->data);
+        for (int i = 0; i < top; ++i)
+            printf("%d", arr[i]);
+        printf("\n");
+    }
+}
+
+// Function to implement Huffman coding
+void huffmanCoding(char data[], int freq[], int size) {
+    // Build the Huffman tree
+    struct Node* root = buildHuffmanTree(data, freq, size);
+    int arr[size], top = 0;
+    // Print Huffman codes
+    printCodes(root, arr, top);
+}
+
+int main() {
+    char data[] = {'a', 'b', 'c', 'd', 'e', 'f'};
+    int freq[] = {5, 9, 12, 13, 16, 45};
+    int size = sizeof(data) / sizeof(data[0]);
+    // Perform Huffman coding
+    huffmanCoding(data, freq, size);
+    return 0;
+}
