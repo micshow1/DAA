@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define V 4 // Number of vertices in the graph
+
+// Function to find the minimum distance vertex not yet included in the path
+int minDistance(int dist[], bool visited[]) {
+    int min = INT_MAX, min_index;
+    for (int v = 0; v < V; v++)
+        if (visited[v] == false && dist[v] <= min)
+            min = dist[v], min_index = v;
+    return min_index;
+}
+
+// Function to print the path and total cost
+void printPath(int parent[], int graph[V][V]) {
+    printf("Vertex   Distance from Source\n");
+    int totalCost = 0;
+    for (int i = 1; i < V; i++) {
+        totalCost += graph[i][parent[i]];
+        printf("%d \t\t %d\n", i, graph[i][parent[i]]);
+    }
+    printf("Total cost: %d\n", totalCost);
+}
+
+// Function to implement the Nearest Neighbor algorithm for TSP
+void nearestNeighbor(int graph[V][V]) {
+    int parent[V]; // Store the nearest neighbor of each vertex
+    bool visited[V]; // Mark vertices as visited
+
+    for (int i = 0; i < V; i++)
+        visited[i] = false;
+
+    // Start from the first vertex
+    parent[0] = -1;
+    visited[0] = true;
+
+    // Find nearest neighbor for each vertex
+    for (int count = 0; count < V - 1; count++) {
+        int u = minDistance(graph[0], visited);
+        visited[u] = true;
+        parent[count + 1] = u;
+    }
+
+    // Print the path and total cost
+    printPath(parent, graph);
+}
+
+int main() {
+    // Example graph represented as an adjacency matrix
+    int graph[V][V] = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+
+    // Find the minimum cost path using Nearest Neighbor algorithm
+    nearestNeighbor(graph);
+
+    return 0;
+}
