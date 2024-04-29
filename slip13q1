@@ -1,0 +1,36 @@
+#include <stdio.h>
+#include <limits.h>
+
+// Function to find the minimum number of scalar multiplications needed to compute the matrix chain product
+int matrixChainOrder(int dims[], int n) {
+    int dp[n][n]; // dp[i][j] stores the minimum number of multiplications needed to compute the product of matrices from matrix i to matrix j
+
+    // Initialize the dp table
+    for (int i = 0; i < n; i++)
+        dp[i][i] = 0;
+
+    // Fill the dp table in a bottom-up manner
+    for (int len = 2; len < n; len++) {
+        for (int i = 1; i < n - len + 1; i++) {
+            int j = i + len - 1;
+            dp[i][j] = INT_MAX;
+            for (int k = i; k <= j - 1; k++) {
+                int cost = dp[i][k] + dp[k + 1][j] + dims[i - 1] * dims[k] * dims[j];
+                if (cost < dp[i][j])
+                    dp[i][j] = cost;
+            }
+        }
+    }
+
+    // The result is stored in dp[1][n-1], where 1 and n-1 represent the first and last matrices respectively
+    return dp[1][n - 1];
+}
+
+int main() {
+    int dims[] = {10, 30, 5, 60}; // Dimensions of matrices, e.g., 10x30, 30x5, 5x60
+    int n = sizeof(dims) / sizeof(dims[0]);
+
+    printf("Minimum number of multiplications: %d\n", matrixChainOrder(dims, n));
+
+    return 0;
+}
