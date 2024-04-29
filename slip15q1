@@ -1,0 +1,76 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
+
+// Structure to represent an item
+struct Item {
+    int value;
+    int weight;
+};
+
+// Function to compare items based on their value-to-weight ratio
+int compare(const void* a, const void* b) {
+    double ratio1 = (double)(((struct Item*)a)->value) / (((struct Item*)a)->weight);
+    double ratio2 = (double)(((struct Item*)b)->value) / (((struct Item*)b)->weight);
+    if (ratio1 > ratio2)
+        return -1;
+    else if (ratio1 < ratio2)
+        return 1;
+    else
+        return 0;
+}
+
+// Function to solve 0/1 Knapsack Problem using LCBB
+int knapsackLCBB(int W, struct Item arr[], int n) {
+    qsort(arr, n, sizeof(arr[0]), compare);
+
+    int maxProfit = 0;
+    int currentWeight = 0;
+    int currentValue = 0;
+    int currentIndex = 0;
+
+    while (1) {
+        while (currentIndex < n && currentWeight + arr[currentIndex].weight <= W) {
+            currentWeight += arr[currentIndex].weight;
+            currentValue += arr[currentIndex].value;
+            currentIndex++;
+        }
+
+        if (currentIndex == n)
+            return maxProfit;
+
+        maxProfit = MAX(maxProfit, currentValue);
+
+        // Calculate bound using fractional knapsack
+        double bound = currentValue + (double)(W - currentWeight) * arr[currentIndex].value / arr[currentIndex].weight;
+
+        if (bound <= maxProfit)
+            return maxProfit;
+
+        currentWeight -= arr[currentIndex].weight;
+        currentValue -= arr[currentIndex].value;
+        currentIndex++;
+    }
+}
+
+int main() {
+    int n, W;
+    printf("Enter the number of items: ");
+    scanf("%d", &n);
+
+    struct Item arr[n];
+    printf("Enter the value and weight of each item:\n");
+    for (int i = 0; i < n; i++) {
+        printf("Item %d: ", i + 1);
+        scanf("%d %d", &arr[i].value, &arr[i].weight);
+    }
+
+    printf("Enter the capacity of the knapsack: ");
+    scanf("%d", &W);
+
+    int maxProfit = knapsackLCBB(W, arr, n);
+    printf("Maximum possible profit: %d\n", maxProfit);
+
+    return 0;
+}
