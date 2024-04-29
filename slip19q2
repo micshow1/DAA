@@ -1,0 +1,23 @@
+#include <stdio.h>
+
+#define N 4
+
+// Function to print the board configuration for the 4 Queens Problem
+void printBoard(int board[N][N]) {
+    printf("Board Configuration:\n");
+    for (int i = 0; i < N; i++) {
+        for (int j = 0; j < N; j++) {
+            printf("%d ", board[i][j]);
+        }
+        printf("\n");
+    }
+}
+
+int main() {
+    int board[N][N] = {{0, 0, 1, 0},
+                       {1, 0, 0, 0},
+                       {0, 0, 0, 1},
+                       {0, 1, 0, 0}};
+    printBoard(board);
+    return 0;
+}
