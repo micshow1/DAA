@@ -1,0 +1,82 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define V 5
+
+// Function to check if vertex v can be added at index 'pos' in the Hamiltonian cycle
+bool isSafe(int v, bool graph[V][V], int path[], int pos) {
+    // Check if vertex v is adjacent to the previously added vertex
+    if (!graph[path[pos - 1]][v])
+        return false;
+
+    // Check if vertex v is already included in the path
+    for (int i = 0; i < pos; i++)
+        if (path[i] == v)
+            return false;
+
+    return true;
+}
+
+// Function to solve the Hamiltonian cycle problem using backtracking
+bool hamCycleUtil(bool graph[V][V], int path[], int pos) {
+    // Base case: if all vertices are included in the path
+    if (pos == V) {
+        // Check if there is an edge from the last included vertex to the first vertex
+        if (graph[path[pos - 1]][path[0]])
+            return true;
+        else
+            return false;
+    }
+
+    // Try different vertices as the next candidate in the cycle
+    for (int v = 1; v < V; v++) {
+        if (isSafe(v, graph, path, pos)) {
+            path[pos] = v;
+            if (hamCycleUtil(graph, path, pos + 1))
+                return true;
+            path[pos] = -1; // Backtrack
+        }
+    }
+
+    return false;
+}
+
+// Function to print the Hamiltonian cycle if it exists
+void printHamCycle(int path[]) {
+    printf("Hamiltonian Cycle found: ");
+    for (int i = 0; i < V; i++)
+        printf("%d ", path[i]);
+    printf("%d ", path[0]); // Print the first vertex again to complete the cycle
+    printf("\n");
+}
+
+// Function to find a Hamiltonian cycle in the graph
+void hamCycle(bool graph[V][V]) {
+    int path[V];
+    for (int i = 0; i < V; i++)
+        path[i] = -1;
+
+    path[0] = 0; // Start from vertex 0 as the first vertex in the path
+
+    if (!hamCycleUtil(graph, path, 1)) {
+        printf("No Hamiltonian Cycle exists.\n");
+        return;
+    }
+
+    printHamCycle(path);
+}
+
+int main() {
+    // Example graph represented as an adjacency matrix
+    bool graph[V][V] = {
+        {0, 1, 0, 1, 0},
+        {1, 0, 1, 1, 1},
+        {0, 1, 0, 0, 1},
+        {1, 1, 0, 0, 1},
+        {0, 1, 1, 1, 0}
+    };
+
+    hamCycle(graph);
+
+    return 0;
+}
