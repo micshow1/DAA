@@ -1,0 +1,57 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent an item
+struct Item {
+    int value;
+    int weight;
+};
+
+// Function to compare two items based on their value per unit weight (value/weight ratio)
+int compare(const void *a, const void *b) {
+    double ratio1 = ((double)(((struct Item *)a)->value) / ((struct Item *)a)->weight);
+    double ratio2 = ((double)(((struct Item *)b)->value) / ((struct Item *)b)->weight);
+    if (ratio1 < ratio2)
+        return 1; // Sort in descending order of value/weight ratio
+    else if (ratio1 > ratio2)
+        return -1;
+    else
+        return 0;
+}
+
+// Function to find the maximum value that can be obtained by selecting items fractionally
+double fractionalKnapsack(int capacity, struct Item items[], int n) {
+    // Sort items based on value per unit weight (value/weight ratio)
+    qsort(items, n, sizeof(struct Item), compare);
+
+    int currentWeight = 0;  // Current weight in knapsack
+    double finalValue = 0.0; // Result (value in knapsack)
+
+    // Loop through all items and pick the one with the highest value/weight ratio
+    for (int i = 0; i < n; i++) {
+        // If adding the entire item would not exceed the capacity, add it fully
+        if (currentWeight + items[i].weight <= capacity) {
+            currentWeight += items[i].weight;
+            finalValue += items[i].value;
+        }
+        // Otherwise, add a fraction of the item to fill the knapsack to its capacity
+        else {
+            int remainingWeight = capacity - currentWeight;
+            finalValue += items[i].value * ((double)remainingWeight / items[i].weight);
+            break;
+        }
+    }
+
+    return finalValue;
+}
+
+int main() {
+    int capacity = 50; // Capacity of the knapsack
+    struct Item items[] = {{60, 10}, {100, 20}, {120, 30}}; // Example items: {value, weight}
+    int n = sizeof(items) / sizeof(items[0]);
+
+    double maxValue = fractionalKnapsack(capacity, items, n);
+    printf("Maximum value in Knapsack = %.2f\n", maxValue);
+
+    return 0;
+}
