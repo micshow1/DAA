@@ -1,0 +1,88 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define MAX_NODES 100
+
+// Function to find live, E, and dead nodes in a graph
+void findNodes(int graph[MAX_NODES][MAX_NODES], int n) {
+    bool isLive[MAX_NODES] = {false}; // to store live nodes
+    bool isE[MAX_NODES] = {false}; // to store E nodes
+    bool isDead[MAX_NODES] = {false}; // to store dead nodes
+
+    // Mark live nodes
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            if (graph[i][j]) {
+                isLive[i] = true; // mark node as live if it has outgoing edge
+                break;
+            }
+        }
+    }
+
+    // Mark E nodes
+    for (int j = 0; j < n; j++) {
+        bool hasOutgoingEdge = false;
+        for (int i = 0; i < n; i++) {
+            if (graph[i][j]) {
+                hasOutgoingEdge = true;
+                break;
+            }
+        }
+        if (!hasOutgoingEdge) {
+            for (int i = 0; i < n; i++) {
+                if (graph[j][i]) {
+                    isE[j] = true; // mark node as E if it has no outgoing edge but has incoming edge
+                    break;
+                }
+            }
+        }
+    }
+
+    // Mark dead nodes
+    for (int j = 0; j < n; j++) {
+        if (!isLive[j] && !isE[j])
+            isDead[j] = true;
+    }
+
+    // Print live nodes
+    printf("Live nodes: ");
+    for (int i = 0; i < n; i++) {
+        if (isLive[i])
+            printf("%d ", i);
+    }
+    printf("\n");
+
+    // Print E nodes
+    printf("E nodes: ");
+    for (int i = 0; i < n; i++) {
+        if (isE[i])
+            printf("%d ", i);
+    }
+    printf("\n");
+
+    // Print dead nodes
+    printf("Dead nodes: ");
+    for (int i = 0; i < n; i++) {
+        if (isDead[i])
+            printf("%d ", i);
+    }
+    printf("\n");
+}
+
+int main() {
+    int n;
+    printf("Enter the number of nodes in the graph: ");
+    scanf("%d", &n);
+
+    int graph[MAX_NODES][MAX_NODES];
+    printf("Enter the adjacency matrix of the graph:\n");
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            scanf("%d", &graph[i][j]);
+        }
+    }
+
+    findNodes(graph, n);
+
+    return 0;
+}
