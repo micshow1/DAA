@@ -1,0 +1,126 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+
+#define MAX_VERTICES 100
+
+// Structure to represent a node in the adjacency list
+struct AdjListNode {
+    int dest;
+    struct AdjListNode* next;
+};
+
+// Structure to represent the adjacency list
+struct AdjList {
+    struct AdjListNode* head;
+};
+
+// Structure to represent the graph
+struct Graph {
+    int V; // Number of vertices
+    struct AdjList* array;
+};
+
+// Function to create a new adjacency list node
+struct AdjListNode* newAdjListNode(int dest) {
+    struct AdjListNode* newNode =
+        (struct AdjListNode*)malloc(sizeof(struct AdjListNode));
+    newNode->dest = dest;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to create a graph with V vertices
+struct Graph* createGraph(int V) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->array = (struct AdjList*)malloc(V * sizeof(struct AdjList));
+    for (int i = 0; i < V; ++i)
+        graph->array[i].head = NULL;
+    return graph;
+}
+
+// Function to add an edge to an undirected graph
+void addEdge(struct Graph* graph, int src, int dest) {
+    struct AdjListNode* newNode = newAdjListNode(dest);
+    newNode->next = graph->array[src].head;
+    graph->array[src].head = newNode;
+
+    newNode = newAdjListNode(src);
+    newNode->next = graph->array[dest].head;
+    graph->array[dest].head = newNode;
+}
+
+// Function to print the coloring of vertices
+void printSolution(int color[], int V) {
+    printf("Vertex\tColor\n");
+    for (int i = 0; i < V; i++)
+        printf("%d\t%d\n", i, color[i]);
+}
+
+// Function to check if it's safe to color a vertex with a given color
+bool isSafe(int v, struct Graph* graph, int color[], int c) {
+    struct AdjListNode* temp = graph->array[v].head;
+    while (temp) {
+        if (color[temp->dest] == c)
+            return false;
+        temp = temp->next;
+    }
+    return true;
+}
+
+// Recursive function to assign colors to vertices
+bool graphColoringUtil(struct Graph* graph, int m, int color[], int v) {
+    if (v == graph->V)
+        return true;
+
+    for (int c = 1; c <= m; c++) {
+        if (isSafe(v, graph, color, c)) {
+            color[v] = c;
+            if (graphColoringUtil(graph, m, color, v + 1))
+                return true;
+            color[v] = 0; // Backtrack
+        }
+    }
+
+    return false;
+}
+
+// Function to color the graph using m colors
+void graphColoring(struct Graph* graph, int m) {
+    int color[MAX_VERTICES];
+    for (int i = 0; i < graph->V; i++)
+        color[i] = 0;
+
+    if (!graphColoringUtil(graph, m, color, 0)) {
+        printf("No solution exists with %d colors.\n", m);
+        return;
+    }
+
+    printf("Solution found with %d colors:\n", m);
+    printSolution(color, graph->V);
+}
+
+int main() {
+    int V, E, m;
+    printf("Enter the number of vertices in the graph: ");
+    scanf("%d", &V);
+    printf("Enter the number of edges in the graph: ");
+    scanf("%d", &E);
+
+    struct Graph* graph = createGraph(V);
+
+    printf("Enter the edges (vertex1 vertex2):\n");
+    for (int i = 0; i < E; i++) {
+        int src, dest;
+        scanf("%d %d", &src, &dest);
+        addEdge(graph, src, dest);
+    }
+
+    printf("Enter the number of colors available: ");
+    scanf("%d", &m);
+
+    graphColoring(graph, m);
+
+    return 0;
+}
