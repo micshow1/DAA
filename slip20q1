@@ -1,0 +1,97 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Structure to represent a node in the adjacency list
+struct AdjListNode {
+    int dest;
+    struct AdjListNode* next;
+};
+
+// Structure to represent the adjacency list
+struct AdjList {
+    struct AdjListNode* head;
+};
+
+// Structure to represent the graph
+struct Graph {
+    int V; // Number of vertices
+    struct AdjList* array;
+};
+
+// Function to create a new adjacency list node
+struct AdjListNode* newAdjListNode(int dest) {
+    struct AdjListNode* newNode =
+        (struct AdjListNode*)malloc(sizeof(struct AdjListNode));
+    newNode->dest = dest;
+    newNode->next = NULL;
+    return newNode;
+}
+
+// Function to create a graph with V vertices
+struct Graph* createGraph(int V) {
+    struct Graph* graph = (struct Graph*)malloc(sizeof(struct Graph));
+    graph->V = V;
+    graph->array = (struct AdjList*)malloc(V * sizeof(struct AdjList));
+    for (int i = 0; i < V; ++i)
+        graph->array[i].head = NULL;
+    return graph;
+}
+
+// Function to add an edge to a directed graph
+void addEdge(struct Graph* graph, int src, int dest) {
+    struct AdjListNode* newNode = newAdjListNode(dest);
+    newNode->next = graph->array[src].head;
+    graph->array[src].head = newNode;
+}
+
+// Recursive function to perform DFS
+void topologicalSortUtil(struct Graph* graph, int v, bool visited[],
+                         int stack[], int* index) {
+    visited[v] = true;
+
+    struct AdjListNode* temp = graph->array[v].head;
+    while (temp) {
+        if (!visited[temp->dest])
+            topologicalSortUtil(graph, temp->dest, visited, stack, index);
+        temp = temp->next;
+    }
+
+    stack[(*index)++] = v;
+}
+
+// Function to perform topological sorting using DFS
+void topologicalSort(struct Graph* graph) {
+    bool* visited = (bool*)malloc(graph->V * sizeof(bool));
+    int* stack = (int*)malloc(graph->V * sizeof(int));
+    int index = 0;
+
+    for (int i = 0; i < graph->V; i++)
+        visited[i] = false;
+
+    for (int i = 0; i < graph->V; i++)
+        if (!visited[i])
+            topologicalSortUtil(graph, i, visited, stack, &index);
+
+    // Print contents of the stack
+    printf("Topological Sorting: ");
+    for (int i = graph->V - 1; i >= 0; i--)
+        printf("%d ", stack[i]);
+    printf("\n");
+
+    free(visited);
+    free(stack);
+}
+
+int main() {
+    struct Graph* graph = createGraph(6);
+    addEdge(graph, 5, 2);
+    addEdge(graph, 5, 0);
+    addEdge(graph, 4, 0);
+    addEdge(graph, 4, 1);
+    addEdge(graph, 2, 3);
+    addEdge(graph, 3, 1);
+
+    topologicalSort(graph);
+
+    return 0;
+}
