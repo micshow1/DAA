@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <stdbool.h>
+
+#define V 5
+
+// Function to check if the given path is a Hamiltonian cycle
+bool isHamiltonianCycle(int path[], int graph[V][V]) {
+    // Check if the path contains all vertices exactly once
+    bool visited[V] = {false};
+    for (int i = 0; i < V; i++) {
+        if (path[i] < 0 || path[i] >= V || visited[path[i]])
+            return false;
+        visited[path[i]] = true;
+    }
+
+    // Check if there is an edge from the last vertex to the first vertex
+    if (!graph[path[V - 1]][path[0]])
+        return false;
+
+    // Check if there is an edge between every pair of consecutive vertices in the path
+    for (int i = 0; i < V - 1; i++) {
+        if (!graph[path[i]][path[i + 1]])
+            return false;
+    }
+
+    return true;
+}
+
+int main() {
+    int graph[V][V] = {
+        {0, 1, 0, 1, 0},
+        {1, 0, 1, 1, 1},
+        {0, 1, 0, 0, 1},
+        {1, 1, 0, 0, 1},
+        {0, 1, 1, 1, 0}
+    };
+
+    // Example path (0 -> 1 -> 2 -> 3 -> 4 -> 0)
+    int path[V] = {0, 1, 2, 3, 4};
+
+    if (isHamiltonianCycle(path, graph))
+        printf("The given path forms a Hamiltonian cycle.\n");
+    else
+        printf("The given path does not form a Hamiltonian cycle.\n");
+
+    return 0;
+}
